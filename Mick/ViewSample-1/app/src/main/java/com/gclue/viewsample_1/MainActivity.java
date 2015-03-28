@@ -14,10 +14,10 @@ public class MainActivity extends ActionBarActivity {
 
 //        setContentView(R.layout.activity_main);
 // ① MyViewのインスタンスを生成.
-        MyView mView = new MyView(this.getBaseContext());
+        TaikoView mTaikoView = new TaikoView(this.getBaseContext());
 
         // ② mViewをWindowに貼り付け.
-        setContentView(mView);
+        setContentView(mTaikoView);
 
 
     }
