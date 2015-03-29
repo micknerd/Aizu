@@ -1,146 +1,164 @@
 package com.gclue.pianosample;
 
 import android.app.Activity;
-import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity  extends Activity implements View.OnClickListener {
 
-    /** Button1の定義。 */
-    private Button mButton1;
-    /** Button2の定義。 */
-    private Button mButton2;
-    /** Button3の定義。 */
-    private Button mButton3;
-    /** Button4の定義。 */
-    private Button mButton4;
-    /** Button5の定義。 */
-    private Button mButton5;
-    /** Button6の定義。 */
-    private Button mButton6;
-    /** Button7の定義。 */
-    private Button mButton7;
-    /** Button8の定義。 */
-    private Button mButton8;
+    /** Button配列の定義。 */
+    private ArrayList<Button> buttons = new ArrayList< Button >();
+    /** サウンド配列の定義。 */
+    private ArrayList<MediaPlayer> sounds = new ArrayList< MediaPlayer >();
+    /** /res/layout/pianosample001_layout.xmlに記述したボタンの数。 */
+    private int howManyButtons = 8;
 
-    /** サウンド1の定義。 */
-    private MediaPlayer sound1;
-    /** サウンド2の定義。 */
-    private MediaPlayer sound2;
-    /** サウンド3の定義。 */
-    private MediaPlayer sound3;
-    /** サウンド4の定義。 */
-    private MediaPlayer sound4;
-    /** サウンド5の定義。 */
-    private MediaPlayer sound5;
-    /** サウンド6の定義。 */
-    private MediaPlayer sound6;
-    /** サウンド7の定義。 */
-    private MediaPlayer sound7;
-    /** サウンド8の定義。 */
-    private MediaPlayer sound8;
+    /** Data. */
+    //private int[] mMerody = {0,1,2,1,2,3,1,2,3,1,2,3};
+
+    /** Data. */
+    private String mMerodyData = "{\"title\" : \"MySound\",\"data\" : [" +
+            "{\"merody\" : 0,\"time\" : 500}," +
+            "{\"merody\" : 1,\"time\" : 500}," +
+            "{\"merody\" : 2,\"time\" : 500}," +
+            "{\"merody\" : 1,\"time\" : 500}," +
+            "{\"merody\" : 2,\"time\" : 300}," +
+            "{\"merody\" : 3,\"time\" : 100}," +
+            "{\"merody\" : 1,\"time\" : 500}," +
+            "{\"merody\" : 2,\"time\" : 300}," +
+            "{\"merody\" : 3,\"time\" : 100}," +
+            "{\"merody\" : 1,\"time\" : 500}," +
+            "{\"merody\" : 2,\"time\" : 300}," +
+            "{\"merody\" : 3,\"time\" : 100},]}";
+
+    /** Button play. */
+    private Button mButtonPlay;
+
+    /** Button get. */
+    private Button mButtonGet;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreate( Bundle savedInstanceState ) {
+        super.onCreate( savedInstanceState );
         requestWindowFeature( Window.FEATURE_NO_TITLE );
-        setContentView(R.layout.activity_main);
+        setContentView( R.layout.activity_main );
 
-        mButton1 = (Button)findViewById(R.id.button1);
-        mButton2 = (Button) findViewById( R.id.button2 );
-        mButton3 = (Button) findViewById( R.id.button3 );
-        mButton4 = (Button) findViewById( R.id.button4 );
-        mButton5 = (Button) findViewById( R.id.button5 );
-        mButton6 = (Button) findViewById( R.id.button6 );
-        mButton7 = (Button) findViewById( R.id.button7 );
-        mButton8 = (Button) findViewById( R.id.button8 );
+        // Play Button
+        mButtonPlay = (Button)findViewById(R.id.buttonPlay);
+        mButtonPlay.setOnClickListener( this );
 
-        mButton1.setOnClickListener(this);
-        mButton2.setOnClickListener( this );
-        mButton3.setOnClickListener( this );
-        mButton4.setOnClickListener( this );
-        mButton5.setOnClickListener( this );
-        mButton6.setOnClickListener( this );
-        mButton7.setOnClickListener( this );
-        mButton8.setOnClickListener( this );
+        mButtonGet = (Button)findViewById(R.id.buttonGet);
+        mButtonGet.setOnClickListener( this );
 
-        // サウンドを用意する
-        sound1 = MediaPlayer.create( this, R.raw.sound01 );
-        sound2 = MediaPlayer.create( this, R.raw.sound02 );
-        sound3 = MediaPlayer.create( this, R.raw.sound03 );
-        sound4 = MediaPlayer.create( this, R.raw.sound04 );
-        sound5 = MediaPlayer.create( this, R.raw.sound05 );
-        sound6 = MediaPlayer.create( this, R.raw.sound06 );
-        sound7 = MediaPlayer.create( this, R.raw.sound07 );
-        sound8 = MediaPlayer.create( this, R.raw.sound08 );
-
+        // /res/layout/pianosample_layout.xml に記述したボタンを読み込む
+        addButtonAndSound(howManyButtons);
     }
 
+    /**
+     * ボタンをボタン配列に、サウンドをサウンド配列に格納する。
+     * @param num ボタンの数
+     */
+    private void addButtonAndSound( int num ) {
+        for ( int i = 0; i < num; i++ ) {
+            String n = Integer.toString( i + 1 );
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+            // ボタンをボタン配列に格納する
+            int buttonId = getResources().getIdentifier( "button" + n, "id", getPackageName() );
+            Button mButton = (Button) findViewById( buttonId );
+            mButton.setOnClickListener( this );
+            buttons.add( mButton );
+
+            // サウンドをサウンド配列に格納する
+            // サウンドファイルがsound01のように、0が付いた2桁表示になっているため、数値の頭に0を付けた文字列を作成する
+            if ( i < 10 ) {
+                n = "0" + n;
+            }
+            int soundId = getResources().getIdentifier( "sound" + n, "raw", getPackageName() );
+
+            MediaPlayer sound = MediaPlayer.create( this, soundId );
+            sounds.add( sound );
+        }
     }
 
+    /**
+     * コンポーネントがクリックされると呼び出される。
+     */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    public void onClick( View mView ) {
+        if(mView.equals(mButtonPlay)) {
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+            /*
+            for(int i = 0; i < mMerody.length; i++) {
+                int onkai = mMerody[i];
+                sounds.get(onkai).seekTo(0);
+                sounds.get(onkai).start();
 
-        return super.onOptionsItemSelected(item);
-    }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            */
 
-    @Override
-    public void onClick(View mView) {
-        // クリックされたViewがmButtonの場合
-        if ( mView.equals( mButton1 ) ) {
-            sound1.seekTo( 0 );
-            sound1.start();
-        }
-        else if ( mView.equals( mButton2 ) ) {
-            sound2.seekTo( 0 );
-            sound2.start();
-        }
-        else if ( mView.equals( mButton3 ) ) {
-            sound3.seekTo( 0 );
-            sound3.start();
-        }
-        else if ( mView.equals( mButton4 ) ) {
-            sound4.seekTo( 0 );
-            sound4.start();
-        }
-        else if ( mView.equals( mButton5 ) ) {
-            sound5.seekTo( 0 );
-            sound5.start();
-        }
-        else if ( mView.equals( mButton6 ) ) {
-            sound6.seekTo( 0 );
-            sound6.start();
-        }
-        else if ( mView.equals( mButton7 ) ) {
-            sound7.seekTo( 0 );
-            sound7.start();
-        }
-        else if ( mView.equals( mButton8 ) ) {
-            sound8.seekTo( 0 );
-            sound8.start();
+            JSONObject mMerodyJson = null;
+            try {
+                // MYDATAという名前のSharedPreference
+                SharedPreferences settings = this.getSharedPreferences("MYDATA", this.MODE_PRIVATE);
+                String mMerodyData = settings.getString("DATA","");
+
+                mMerodyJson = new JSONObject(mMerodyData);
+
+                Log.i("PIANO", "title:" + mMerodyJson.get("title"));
+
+                JSONArray datas = mMerodyJson.getJSONArray("data");
+
+                for(int i = 0; i < datas.length(); i++) {
+                    int onkai = datas.getJSONObject(i).getInt("merody");
+                    //sounds.get(onkai).seekTo(0);
+                    //sounds.get(onkai).start();
+                    buttons.get(onkai).performClick();
+
+                    int sleepTime = datas.getJSONObject(i).getInt("time");
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        } else if(mView.equals(mButtonGet)) {
+            Intent selectIntent = new Intent();
+            selectIntent.setClassName("com.gclue.pianosample","com.gclue.pianosample.ListViewActivity");
+            startActivity(selectIntent);
+        } else {
+            // button配列に格納してあるButtonを一つずつ取り出し、クリックされたView(mView)とButtonが一致した場合、音を再生する。
+            for (int i = 0; i < howManyButtons; i++) {
+                if (mView.equals(buttons.get(i))) {
+                    Log.i("PIANO", "Button" + Integer.toString(i + 1) + "がクリックされました。");
+                    sounds.get(i).seekTo(0);
+                    sounds.get(i).start();
+                    return;
+                }
+            }
         }
     }
 }
+

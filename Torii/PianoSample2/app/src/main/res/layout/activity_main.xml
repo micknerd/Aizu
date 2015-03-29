@@ -93,4 +93,25 @@
         android:layout_marginTop="1dp"
         android:background="@drawable/kenban"
         android:text="" />
+
+    <Button
+        android:id="@+id/buttonPlay"
+        android:layout_width="fill_parent"
+        android:layout_height="55dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/button8"
+        android:layout_marginTop="10dp"
+        android:text="play" />
+
+    <Button
+        android:id="@+id/buttonGet"
+        android:layout_width="fill_parent"
+        android:layout_height="55dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/buttonPlay"
+        android:layout_marginTop="2dp"
+        android:text="get Data" />
+
 </RelativeLayout>
