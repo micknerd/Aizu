@@ -66,6 +66,9 @@ public class MainActivity extends ActionBarActivity {
                             editor.commit();
                         }
                     })).start();
+
+        Thread mThread = new Thread((Runnable) this);
+
     }
 
     @Override
